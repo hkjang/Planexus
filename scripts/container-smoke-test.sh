@@ -36,7 +36,7 @@ if [ "${database_ready}" != true ]; then
   exit 1
 fi
 
-"${DOCKER_COMMAND}" run --rm -d --name "${APP_CONTAINER}" --network "${NETWORK}" \
+"${DOCKER_COMMAND}" run -d --name "${APP_CONTAINER}" --network "${NETWORK}" \
   --read-only --tmpfs /tmp:rw,noexec,nosuid,size=64m \
   -p "${PORT}:8080" \
   -e POSTGRES_DSN="postgres://planexus:planexus-smoke-password@${DB_CONTAINER}:5432/planexus?sslmode=disable" \
@@ -48,10 +48,13 @@ fi
 application_ready=false
 for _ in $(seq 1 45); do
   if curl -fsS "http://127.0.0.1:${PORT}/health/ready" >/dev/null 2>&1; then application_ready=true; break; fi
+  if [ "$("${DOCKER_COMMAND}" inspect -f '{{.State.Running}}' "${APP_CONTAINER}" 2>/dev/null || true)" != true ]; then break; fi
   sleep 1
 done
 if [ "${application_ready}" != true ]; then
   "${DOCKER_COMMAND}" logs "${APP_CONTAINER}" >&2 || true
+  "${DOCKER_COMMAND}" inspect -f 'state={{json .State}}' "${APP_CONTAINER}" >&2 || true
+  "${DOCKER_COMMAND}" logs "${DB_CONTAINER}" >&2 || true
   exit 1
 fi
 
