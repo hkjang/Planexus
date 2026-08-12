@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120">
+  <defs>
+    <linearGradient id="planexus-edge-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#6366f1" />
+      <stop offset="50%" stop-color="#8b5cf6" />
+      <stop offset="100%" stop-color="#10b981" />
+    </linearGradient>
+    <filter id="edge-glow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="3.5" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Transparent Background, Sharp Edge Monogram P + Strategy Pipeline Grid -->
+  <g filter="url(#edge-glow)">
+    <!-- Main Neon P Monogram Curve -->
+    <path d="M 32 104 L 32 20 L 72 20 C 90 20, 90 56, 72 56 L 32 56" 
+          fill="none" 
+          stroke="url(#planexus-edge-grad)" 
+          stroke-width="12" 
+          stroke-linecap="round" 
+          stroke-linejoin="round" />
+    
+    <!-- Strategy Node Markers -->
+    <circle cx="32" cy="20" r="6" fill="#6366f1" />
+    <circle cx="72" cy="20" r="6" fill="#8b5cf6" />
+    <circle cx="72" cy="56" r="6" fill="#10b981" />
+    <circle cx="32" cy="104" r="6" fill="#6366f1" />
+    
+    <!-- Horizon Strategy Line -->
+    <line x1="56" y1="80" x2="96" y2="80" stroke="#10b981" stroke-width="6" stroke-linecap="round" />
+    <circle cx="96" cy="80" r="5" fill="#10b981" />
+  </g>
+</svg>

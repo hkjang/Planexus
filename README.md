@@ -1,6 +1,18 @@
-# Planexus
+<p align="center">
+  <img src="docs/favicon.svg" alt="Planexus Logo" width="90"><br><br>
+  <h1 align="center">Planexus</h1>
+</p>
 
-Planexus is an offline-ready Enterprise Strategy & Planning Intelligence Platform. It connects strategy, KPI, plans, portfolios, performance, decisions, and governed AI in one operating system.
+<p align="center">
+  <strong>오프라인 대응 엔터프라이즈 전사 전략 & 시나리오 플래닝 인텔리전스 OS</strong><br>
+  전략-KPI 목표 통섭, 결정론적 수지 시뮬레이션, 거버닝 AI 및 Streamable MCP 지원.
+</p>
+
+<p align="center">
+  <a href="https://hkjang.github.io/Planexus/">🇰🇷 홍보 페이지</a> · <a href="https://hkjang.github.io/Planexus/index_en.html">🇺🇸 English Page</a> · <a href="https://github.com/sponsors/hkjang">💖 Sponsor</a>
+</p>
+
+---
 
 The current release is a production-shaped MVP: strategy/KPI/project portfolio, business plans with optional approval, decision and intelligence records, deterministic scenarios, governed AI, permission-filtered global search, Excel import/rollback, notification rules, immutable audit, backup/restore, OpenAPI and MCP are executable end to end.
 
