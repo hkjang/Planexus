@@ -10,6 +10,7 @@ fi
 COOKIE_FILE=/tmp/planexus-integration-cookie
 LOGIN_FILE=/tmp/planexus-integration-login.json
 SERVER_LOG=/tmp/planexus-integration-server.log
+SERVER_BINARY=/tmp/planexus-integration-server
 IMPORT_FILE=/tmp/planexus-integration-import.xlsx
 BACKUP_FILE=/tmp/planexus-integration-backup.plxbackup
 SERVER_PID=
@@ -20,6 +21,7 @@ cleanup() {
   unlink "${COOKIE_FILE}" 2>/dev/null || true
   unlink "${LOGIN_FILE}" 2>/dev/null || true
   unlink "${SERVER_LOG}" 2>/dev/null || true
+  unlink "${SERVER_BINARY}" 2>/dev/null || true
   unlink "${IMPORT_FILE}" 2>/dev/null || true
   unlink "${BACKUP_FILE}" 2>/dev/null || true
 }
@@ -31,22 +33,35 @@ trap cleanup EXIT INT TERM
   -e POSTGRES_DB=planexus \
   -p "${DB_PORT}:5432" postgres:17-alpine >/dev/null
 
-for _ in $(seq 1 30); do
-  if "${DOCKER_COMMAND}" exec "${DB_CONTAINER}" pg_isready -U planexus -d planexus >/dev/null 2>&1; then break; fi
+database_ready=false
+for _ in $(seq 1 60); do
+  if "${DOCKER_COMMAND}" exec "${DB_CONTAINER}" pg_isready -U planexus -d planexus >/dev/null 2>&1; then database_ready=true; break; fi
   sleep 1
 done
+if [ "${database_ready}" != true ]; then
+  "${DOCKER_COMMAND}" logs "${DB_CONTAINER}" >&2 || true
+  exit 1
+fi
+
+go build -ldflags '-X main.version=integration' -o "${SERVER_BINARY}" ./cmd/planexus
 
 POSTGRES_DSN="postgres://planexus:planexus-test-password@127.0.0.1:${DB_PORT}/planexus?sslmode=disable" \
 BOOTSTRAP_ADMIN=admin \
 BOOTSTRAP_ADMIN_PASSWORD='Planexus-Test-1234!' \
 ENCRYPTION_KEY='MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=' \
-go run -ldflags '-X main.version=integration' ./cmd/planexus >"${SERVER_LOG}" 2>&1 &
+"${SERVER_BINARY}" >"${SERVER_LOG}" 2>&1 &
 SERVER_PID=$!
 
-for _ in $(seq 1 30); do
-  if curl -fsS http://127.0.0.1:8080/health/ready >/dev/null 2>&1; then break; fi
+application_ready=false
+for _ in $(seq 1 60); do
+  if curl -fsS http://127.0.0.1:8080/health/ready >/dev/null 2>&1; then application_ready=true; break; fi
+  if ! kill -0 "${SERVER_PID}" 2>/dev/null; then break; fi
   sleep 1
 done
+if [ "${application_ready}" != true ]; then
+  cat "${SERVER_LOG}" >&2 || true
+  exit 1
+fi
 
 curl -fsS -c "${COOKIE_FILE}" -H 'Content-Type: application/json' \
   -d '{"username":"admin","password":"Planexus-Test-1234!"}' \
