@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120">
+  <defs>
+    <!-- Ultra Sharp Intense Neon Gradient for Planexus -->
+    <linearGradient id="planexus-intense-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#6366f1" />
+      <stop offset="50%" stop-color="#a855f7" />
+      <stop offset="100%" stop-color="#06b6d4" />
+    </linearGradient>
+    <filter id="px-glow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="4" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Completely Transparent Background (No Rectangle Box) -->
+  <g filter="url(#px-glow)">
+    <!-- Sharp Octagonal Edge Ring -->
+    <polygon points="36,10 84,10 110,36 110,84 84,110 36,110 10,84 10,36" 
+             fill="none" 
+             stroke="url(#planexus-intense-grad)" 
+             stroke-width="4" 
+             stroke-dasharray="14 6" 
+             stroke-linecap="round" />
+    
+    <!-- Bold Sharp Edge P Monogram -->
+    <path d="M 38 24 L 38 96 M 38 24 L 76 24 C 92 24, 92 60, 76 60 L 38 60" 
+          fill="none" 
+          stroke="url(#planexus-intense-grad)" 
+          stroke-width="12" 
+          stroke-linecap="round" 
+          stroke-linejoin="round" />
+
+    <!-- Center Strategy Core Node -->
+    <circle cx="68" cy="42" r="7" fill="#ffffff" filter="url(#px-glow)" />
+    <circle cx="38" cy="24" r="5" fill="#6366f1" />
+    <circle cx="38" cy="96" r="5" fill="#06b6d4" />
+  </g>
+</svg>
