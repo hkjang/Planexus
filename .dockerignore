@@ -1,0 +1,9 @@
+.git
+.github
+.env
+node_modules
+web/node_modules
+web/dist
+bin
+dist
+*.tar.gz

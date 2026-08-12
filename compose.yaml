@@ -1,0 +1,14 @@
+services:
+  planexus:
+    image: planexus:v0.1.0
+    restart: unless-stopped
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=64m
+    ports:
+      - "8080:8080"
+    environment:
+      POSTGRES_DSN: ${POSTGRES_DSN}
+      BOOTSTRAP_ADMIN: ${BOOTSTRAP_ADMIN}
+      BOOTSTRAP_ADMIN_PASSWORD: ${BOOTSTRAP_ADMIN_PASSWORD}
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY}

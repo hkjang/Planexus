@@ -1,0 +1,74 @@
+name: Offline image release
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Semantic version without v
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - name: Set up Go
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7
+        with:
+          go-version: 1.26.5
+          cache: true
+      - name: Set up Node.js
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+          package-manager-cache: false
+      - name: Resolve version
+        id: version
+        shell: bash
+        run: |
+          if [[ "${GITHUB_REF_TYPE}" == "tag" ]]; then
+            VERSION="${GITHUB_REF_NAME#v}"
+          else
+            VERSION="${{ inputs.version }}"
+          fi
+          [[ "${VERSION}" =~ ^[0-9]+\.[0-9]+\.[0-9]+([.-][0-9A-Za-z.-]+)?$ ]]
+          echo "value=${VERSION}" >> "$GITHUB_OUTPUT"
+      - name: Verify backend
+        run: |
+          go test -race ./...
+          go vet ./...
+          go run golang.org/x/vuln/cmd/govulncheck@v1.6.0 ./...
+      - name: Verify frontend
+        working-directory: web
+        run: |
+          npm ci
+          npm run build
+          npm test -- --run
+          npm audit --audit-level=high
+      - name: Verify PostgreSQL integration
+        run: ./scripts/integration-test.sh
+      - name: Build offline service image
+        run: docker build --build-arg VERSION=${{ steps.version.outputs.value }} -t planexus:v${{ steps.version.outputs.value }} .
+      - name: Smoke test offline service image
+        run: ./scripts/container-smoke-test.sh ${{ steps.version.outputs.value }}
+      - name: Export compressed image
+        run: |
+          docker save planexus:v${{ steps.version.outputs.value }} | gzip -9 > planexus-v${{ steps.version.outputs.value }}.tar.gz
+          gzip -t planexus-v${{ steps.version.outputs.value }}.tar.gz
+      - name: Release image archive only
+        uses: softprops/action-gh-release@c12583777ecdfd3be55c69cf75464299dc01057e # v3
+        with:
+          tag_name: v${{ steps.version.outputs.value }}
+          generate_release_notes: true
+          files: |
+            planexus-v${{ steps.version.outputs.value }}.tar.gz
